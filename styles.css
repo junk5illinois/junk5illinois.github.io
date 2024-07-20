@@ -1,9 +1,12 @@
 body {
-    display: flex;
-    justify-content: center;
+    text-align: center;
     font-family: Arial, Helvetica, sans-serif;
 }
 
-#headers {
-    text-align: center;
+#start-button {
+    width: 100px;
+}
+
+.tick text {
+    font-size: 13px;
 }
