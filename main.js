@@ -77,7 +77,6 @@ function displaySceneThree(choice) {
   } else {
     finalData.sort((a, b) => d3.descending(a.frequency, b.frequency));
   }
-  console.log(finalData);
 
   // X scale
   const x = d3.scaleBand()
