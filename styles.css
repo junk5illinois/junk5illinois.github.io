@@ -1,80 +1,71 @@
-body {
-    text-align: center;
-    font-family: Arial, Helvetica, sans-serif;
+/* Main header */
+#main-header {
+  text-align: center;
+  margin: 20px;
 }
 
-.tick text {
-    font-size: 13px;
+/* Table formatting */
+td {
+  border: 1px solid black;
 }
 
-#dropdown {
-    display: none;
-    border: 1px solid gray;
-    height: 80px;
-    /* padding: 0 0 0 0; */
-    width: 380px;
-    margin: 0 auto;
-    margin-top: 10px;
-    margin-bottom: 0px;
+table {
+  border: 3px solid black;
+  border-collapse: collapse;
+  margin: auto;
 }
 
-h3 {
-    margin-top: 10px;
-    margin-bottom: 10px;
+.bold-row > td {
+  border-bottom: 3px solid black;
 }
 
-#circle-container {
-    display: none;
-    justify-content: space-between;
-    padding: 0 47% 0 47%;
-    margin-top: 10px;
+td:nth-child(3n) {
+  border-right: 3px solid black;
 }
 
-.circle {
-    height: 10px;
-    width: 10px;
-    border: 1px solid black;
-    border-radius: 50%;
+.table-input {
+  border: none;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 26px;
+  max-length: 1;
 }
 
-button {
-    border-radius: 8px;
-    border-style: none;
-    box-sizing: border-box;
-    color: #FFFFFF;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 18px;
-    font-weight: 500;
-    height: 40px;
-    line-height: 20px;
-    list-style: none;
-    margin: 0;
-    outline: none;
-    padding: 10px 16px;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    transition: color 100ms;
-    vertical-align: baseline;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
+.highlighted {
+  background-color: lightblue;
 }
 
-#start-button {
-    background-color: #008CBA;
+/* Buttons */
+#button-group {
+  display: flex;
+  justify-content: center;
 }
 
-#start-button:hover {
-    background-color: #0077A0;
+#button-group > button {
+  margin: 10px 5px;
 }
 
-#prev-button {
-    display: none;
-    background-color: #989898;
+#vis-options {
+  width: 200px;
+  margin: auto;
+  padding: 10px 20px;
+  border: 1px lightgray solid;
 }
 
-#prev-button:hover {
-    background-color: gray;
+/* Description */
+#description {
+  margin: 0 15%;
+  text-align: center;
 }
+
+#description > h3 {
+  color: darkgray;
+}
+
+/* Error message */
+#error-msg {
+  text-align: center;
+  color: red;
+}
+

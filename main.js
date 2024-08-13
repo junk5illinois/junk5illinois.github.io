@@ -1,423 +1,268 @@
-let data;
-let page = 0;
-const width = window.innerWidth * 0.8;
-const height = window.innerHeight * 0.7;
-const marginTop = 50;
-const marginRight = 80;
-const marginBottom = 80;
-const marginLeft = 80;
+// Initialize a 9x9 array
+const puzzle = new Array(9).fill(null).map(
+  () => new Array(9).fill(null)
+);
 
-// Load and transform data
-d3.csv('./Vic_Road_Crash_Data.csv')
-  .then(csv => {
-    data = csv;
-  })
-  .catch(error => {
-      console.log(`Error loading data: ${error}`);
-      alert('Error loading data, please refresh the page');
-  });
+// Error message div
+const errorMsg = document.getElementById('error-msg');
 
-// Go to next scene
-function next() {
-  if (page === 0) {
-    page++;
-    d3.select('#start-button').text('Next');
-    d3.select('#prev-button').style('display', 'inline-block');
-    d3.select('#circle-container').style('display', 'flex');
-    displaySceneOne();
-  } else if (page === 1) {
-    page++;
-    d3.select('#circle-1').style('background-color', 'white');
-    d3.select('#circle-2').style('background-color', '#008CBA');
-    displaySceneTwo();
-  } else if (page === 2) {
-    page++;
-    d3.select('#circle-2').style('background-color', 'white');
-    d3.select('#circle-3').style('background-color', '#008CBA');
-    d3.select('#dropdown').style('display', 'block');
-    displaySceneThree();
-  } // else we've already reached the end
-}
+/** Demo puzzles if user doesn't want to manually enter one */
+const demos = [
+  [[5,3,'','',7,'','','',''],
+   [6,'','',1,9,5,'','',''],
+   ['',9,8,'','','','',6,''],
+   [8,'','','',6,'','','',3],
+   [4,'','',8,'',3,'','',1],
+   [7,'','','',2,'','','',6],
+   ['',6,'','','','',2,8,''],
+   ['','','',4,1,9,'','',5],
+   ['','','','',8,'','',7,9]
+  ],
+  [['','','',8,'',3,'',1,7],
+   ['','','','',9,6,8,'',''],
+   ['',8,'',4,'','',3,'',''],
+   ['',4,'','',6,5,'','',''],
+   [7,'','',1,'',8,'','',''],
+   ['','',2,'','','',6,'','',''],
+   ['','','',7,'','','','',''],
+   [6,5,4,'','','','','',''],
+   ['',3,'','','','',1,'',9]
+  ],
+  [['','',6,3,'',7,'','',''],
+   ['','',4,'','','','','',5],
+   [1,'','','','',6,'',8,2],
+   [2,'',5,'',3,'',1,'',6],
+   ['','','',2,'','',3,'',''],
+   [9,'','','',7,'','','',4],
+   ['',5,'','','','','','',''],
+   ['',1,'','','','','','',''],
+   ['','',8,1,'',9,'',4,'']
+  ],
+  [['','',3,'','','',2,'',''],
+   ['',6,'',9,8,'','',4,3],
+   [4,9,'','',3,1,'','',6],
+   [9,'',7,'','','',8,6,''],
+   ['',4,'','',9,8,'','',''],
+   ['','',5,4,'',7,1,'',9],
+   [6,'','','','',3,9,'',5],
+   [5,'',8,1,'','','',7,2],
+   [2,'',9,'',5,6,'',3,8]
+  ]
+]
 
-// Go to prevous scene
-function prev() {
-  if (page === 3) {
-    page--;
-    d3.select('#circle-3').style('background-color', 'white');
-    d3.select('#circle-2').style('background-color', '#008CBA');
-    d3.select('#dropdown').style('display', 'none');
-    displaySceneTwo();
-  } else if (page === 2) {
-    page--;
-    d3.select('#circle-2').style('background-color', 'white');
-    d3.select('#circle-1').style('background-color', '#008CBA');
-    displaySceneOne();
-  } // else we can't go back any further
-}
-
-/* Freeform user exploration */
-function displaySceneThree(choice) {
-  d3.select('#chart').html('');
-  // Count frequencies by user's choice
-  const parseDate = d3.timeParse("%d/%m/%Y");
-  const formatDate = d3.timeFormat("%Y");
-
-  // Calculate frequencies
-  let frequencies;
-  if (choice === 'ACCIDENT_DATE') {
-    frequencies = d3.rollup(data, v => v.length, d => formatDate(parseDate(d[choice])));
-  } else {
-    frequencies = d3.rollup(data, v => v.length, d => ['collision with some other object', 'Fall from or in moving vehicle', 'Struck animal'].includes(d[choice]) ? 'Other accident' : d[choice]);
-  }
-  const finalData = Array.from(frequencies, ([choice, frequency]) => ({choice, frequency}));
-
-  // Sort data
-  if (choice === 'ACCIDENT_DATE' || choice === 'LIGHT_CONDITION') {
-    finalData.sort((a, b) => d3.ascending(a.choice, b.choice));
-  } else {
-    finalData.sort((a, b) => d3.descending(a.frequency, b.frequency));
-  }
-
-  // X scale
-  const x = d3.scaleBand()
-    .domain(finalData.map(d => d.choice))
-    .range([marginLeft, width - marginRight])
-    .padding(0.1);
-
-  // Y scale
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(finalData, d => d.frequency)])
-    .nice()
-    .range([height - marginBottom, marginTop]);
-
-  // Create SVG container
-  const svg = d3.select('#chart')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
-  
-  // Create bars
-  if (choice) {
-    svg.selectAll('.bar')
-      .data(finalData)
-      .enter()
-      .append('rect')
-      .attr('class', 'bar')
-      .attr("fill", "steelblue")
-      .attr('x', d => x(d.choice))
-      .attr('width', x.bandwidth())
-      .attr('y', height - marginBottom)
-      .transition().duration(1000)
-      .attr('y', d => y(d.frequency))
-      .attr('height', d => height - marginBottom - y(d.frequency))
-  }
-
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height - marginBottom})`)
-    .call(d3.axisBottom(x).tickSize(0))
-    .selectAll('text')
-    .attr('class', 'axis-label') 
-
-  // Add Y axis
-  svg.append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll('text')
-    .attr('class', 'axis-label')
-
-  // Add X axis label
-  let xLabel;
-  switch (choice) {
-    case 'ACCIDENT_DATE':
-      xLabel = 'Year';
-      break;
-    case 'LIGHT_CONDITION':
-      xLabel = 'Light Condition (1 = low, 9 = high)';
-      break;
-    case 'ACCIDENT_TYPE_DESC':
-      xLabel = 'Accident Type';
-      break;
-    case 'ROAD_GEOMETRY_DESC':
-      xLabel = 'Road Geometry';
-      break;
-    case 'RMA':
-      xLabel = 'Road Type';
-      break;
-  }
-  svg.append('text')
-  .attr('transform', `translate(${width / 2},${height - marginBottom + 40})`)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text(xLabel)
-
-  // Add Y axis label
-  svg.append('text')
-  .attr('transform', 'rotate(-90)')
-  .attr('x', -height / 2)
-  .attr('y', marginLeft - 60)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text('Number of Crashes');
-}
-
-
-/* Histogram by day of week */
-function displaySceneTwo() {
-  d3.select('#chart').html('');
-  // Count frequencies by day of week
-  const dayOfWeekFreq = d3.rollup(data, v => v.length, d => d.DAY_OF_WEEK)
-  const finalData = Array.from(dayOfWeekFreq, ([dayOfWeek, frequency]) => ({dayOfWeek, frequency}));
-  finalData.sort((a, b) => d3.ascending(a.dayOfWeek, b.dayOfWeek));
-  finalData.forEach(row => {
-    switch (row.dayOfWeek) {
-      case '0':
-      case '1': row.dayOfWeek = 'Sun'; break;
-      case '2': row.dayOfWeek = 'Mon'; break;
-      case '3': row.dayOfWeek = 'Tue'; break;
-      case '4': row.dayOfWeek = 'Wed'; break;
-      case '5': row.dayOfWeek = 'Thu'; break;
-      case '6': row.dayOfWeek = 'Fri'; break;
-      case '7': row.dayOfWeek = 'Sat'; break;
+// Visualization options
+let visSpeed;
+/** Sets the visualization speed */
+function handleVis() {
+  let visOptions = document.getElementsByName('visualization');
+  visOptions.forEach(item => {
+    if (item.checked) {
+      visSpeed = Number(item.value);
     }
-  })
-
-  // X scale
-  const x = d3.scaleBand()
-    .domain(finalData.map(d => d.dayOfWeek))
-    .range([marginLeft, width - marginRight])
-    .padding(0.1);
-
-  // Y scale
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(finalData, d => d.frequency)])
-    .nice()
-    .range([height - marginBottom, marginTop]);
-
-  // Create SVG container
-  const svg = d3.select('#chart')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
-  
-  // Create bars
-  svg.selectAll('.bar')
-    .data(finalData)
-    .enter()
-    .append('rect')
-    .attr('class', 'bar')
-    .attr("fill", "steelblue")
-    .attr('x', d => x(d.dayOfWeek))
-    .attr('width', x.bandwidth())
-    .attr('y', height - marginBottom)
-    // .transition().delay(200)
-    .transition().delay((d, i) => 50 * i).duration(1000)
-    .attr('y', d => y(d.frequency))
-    .attr('height', d => height - marginBottom - y(d.frequency))
-    .end().then(() => {
-      // Highlight peak bars
-      svg.selectAll('.bar')
-        .filter(d => d.dayOfWeek == 'Sat')
-        .transition()
-        .duration(1000)
-        .attr("fill", "#CBC3E3");
-
-      // Show annotations
-      svg.append("g")
-        .attr("class", "annotation-group")
-        .style("opacity", 0)
-        .call(showSafeSaturday)
-        .transition().duration(1000)
-        .style("opacity", 1);
   });
-
-const showSafeSaturday = d3.annotation()
-  .editMode(false)
-  .notePadding(15)
-  .type(d3.annotationLabel)
-  .accessors({
-    x: d => x(d.dayOfWeek) + x.bandwidth()/2,
-    y: d => y(d.frequency)
-  })
-  .annotations(safeSaturday)
-  
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height - marginBottom})`)
-    .call(d3.axisBottom(x).tickSize(0))
-    .selectAll('text')
-    .attr('class', 'axis-label') 
-
-  // Add Y axis
-  svg.append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll('text')
-    .attr('class', 'axis-label')
-
-  // Add X axis label
-  svg.append('text')
-  .attr('transform', `translate(${width / 2},${height - marginBottom + 40})`)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text('Day of Week');
-
-  // Add Y axis label
-  svg.append('text')
-  .attr('transform', 'rotate(-90)')
-  .attr('x', -height / 2)
-  .attr('y', marginLeft - 60)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text('Number of Crashes');
-}
-
-  
-/* Histogram by hour of day */
-function displaySceneOne() {
-  d3.select('#chart').html('');
-  // Count frequencies by hour
-  const hrsFreq = d3.rollup(data, v => v.length, d => +d.ACCIDENT_TIME.slice(0,2))
-  const finalData = Array.from(hrsFreq, ([hour, frequency]) => ({hour, frequency}));
-  finalData.sort((a, b) => d3.ascending(a.hour, b.hour));
-
-  // X scale
-  const x = d3.scaleBand()
-    .domain(finalData.map(d => d.hour))
-    .range([marginLeft, width - marginRight])
-    .padding(0.1);
-
-  // Y scale
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(finalData, d => d.frequency)])
-    .nice()
-    .range([height - marginBottom, marginTop]);
-
-  // Create SVG container
-  const svg = d3.select('#chart')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height);
-  
-  // Create bars
-  svg.selectAll('.bar')
-    .data(finalData)
-    .enter()
-    .append('rect')
-    .attr('class', 'bar')
-    .attr("fill", "steelblue")
-    .attr('x', d => x(d.hour))
-    .attr('width', x.bandwidth())
-    .attr('y', height - marginBottom)
-    // .transition().delay(200)
-    .transition().delay((d, i) => 50 * i).duration(1000)
-    .attr('y', d => y(d.frequency))
-    .attr('height', d => height - marginBottom - y(d.frequency))
-    .end().then(() => {
-      // Highlight peak bars
-      svg.selectAll('.bar')
-        .filter(d => [8, 15, 16, 17, 18].includes(d.hour))
-        .transition()
-        .duration(1000)
-        .attr("fill", "orange");
-
-      // Show annotations
-      svg.append("g")
-        .attr("class", "annotation-group")
-        .style("opacity", 0)
-        .call(showMorningRush)
-        .transition().delay(1000).duration(1000)
-        .style("opacity", 1);
-
-      svg.append("g")
-        .attr("class", "annotation-group")
-        .style("opacity", 0)
-        .call(showAfternoonRush)
-        .transition().delay(1000).duration(1000)
-        .style("opacity", 1);
-  });
-
-  const showMorningRush = d3.annotation()
-    .editMode(false)
-    .notePadding(15)
-    .type(d3.annotationLabel)
-    .accessors({
-      x: d => x(d.hour),
-      y: d => y(d.frequency)
-    })
-    .annotations(morningRush)
-
-  const showAfternoonRush = d3.annotation()
-    .editMode(false)
-    .type(d3.annotationLabel)
-    .accessors({
-      x: d => x(d.hour),
-      y: d => y(d.frequency)
-    })
-    .annotations(afternoonRush)
-  
-  // Add X axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height - marginBottom})`)
-    .call(d3.axisBottom(x).tickSize(0))
-    .selectAll('text')
-    .attr('class', 'axis-label') 
-
-  // Add Y axis
-  svg.append('g')
-    .attr('transform', `translate(${marginLeft},0)`)
-    .call(d3.axisLeft(y))
-    .selectAll('text')
-    .attr('class', 'axis-label')
-
-  // Add X axis label
-  svg.append('text')
-  .attr('transform', `translate(${width / 2},${height - marginBottom + 40})`)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text('Hour of Day');
-
-  // Add Y axis label
-  svg.append('text')
-  .attr('transform', 'rotate(-90)')
-  .attr('x', -height / 2)
-  .attr('y', marginLeft - 60)
-  .style('text-anchor', 'middle')
-  .attr('class', 'axis-label')
-  .text('Number of Crashes');
 }
 
 
-// Annotations
-const morningRush = [{
-  note: {
-    title: "Morning Rush",
-    label: "I'm late to work!",
-  },
-  data: { hour: 8, frequency: 9500 },
-  className: "show-bg",
-  dy: 40,
-  dx: -110
-}]
+/** Prints a single number to cell i,j
+ *  Delays at the end for visualization purposes */
+async function printCell(num, i, j) {
+  const inputBox = document.getElementById(`${i}${j}`);
+  inputBox.value = num;
+  inputBox.style.backgroundColor = num ? 'lightblue' : 'transparent';
+  await new Promise(resolve => setTimeout(resolve, visSpeed));
+}
 
-const afternoonRush = [{
-  note: {
-    label: "Work is done, I don't care what happens to me anymore",
-    title: "Afternoon Rush",
-    wrap: 150,
-  },
-  data: { hour: 18, frequency: 12000 },
-  className: "show-bg",
-  dy: 20,
-  dx: 150,
-}]
 
-const safeSaturday = [{
-  note: {
-    title: "Saturdays are the safest day",
-  },
-  data: { dayOfWeek: 'Sat', frequency: 19300 },
-  className: "show-bg",
-  dy: 0,
-  dx: 0,
-}]
+/** Determine if a number is allowed in a cell or not */
+function valid(row, col, num) {
+// Check each row
+  for (let i = 0; i < 9; i++) {
+    if (puzzle[row][i] === num) {
+      return false;
+    }
+  }
+
+  // Check each column
+  for (let i = 0; i < 9; i++) {
+    if (puzzle[i][col] === num) {
+      return false;
+    }
+  }
+
+  // Check each 3x3 box
+  const rowBox = Math.floor(row / 3) * 3;
+  const colBox = Math.floor(col / 3) * 3;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (puzzle[rowBox + i][colBox + j] === num) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+/** Find the next cell that is empty */
+function findNextEmptyCell() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (puzzle[r][c] === -1) {
+        return [r, c];
+      }
+    }
+  }
+  return [false, false];
+}
+
+
+/** Check if the given puzzle inputs are valid */
+function validPuzzle() {
+  // Check each row
+  for (let i = 0; i < 9; i++) {
+    const rowInput = puzzle[i].filter(num => num !== -1);
+    if (rowInput.length !== _.unique(rowInput).length) {
+      errorMsg.textContent = `Row ${i+1} contains duplicate values`;
+      return false;
+    }
+  }
+
+  // Check each column
+  const flippedPuzzle = _.zip(...puzzle);
+  for (let i = 0; i < 9; i++) {
+    const colInput = flippedPuzzle[i].filter(num => num !== -1);
+    if (colInput.length !== _.unique(colInput).length) {
+      errorMsg.textContent = `Column ${i+1} contains duplicate values`;
+      return false;
+    }
+  }
+
+  // Check each 3x3 box
+  for (let i of [0, 3, 6]) {
+    for (let j of [0, 3, 6]) {
+      let threeByThree = [];
+      threeByThree.push(...puzzle[i].slice(j, j+3));
+      threeByThree.push(...puzzle[i+1].slice(j, j+3));
+      threeByThree.push(...puzzle[i+2].slice(j, j+3));
+      const threeByThreeInput = threeByThree.filter(num => num !== -1);
+      if (threeByThreeInput.length !== _.unique(threeByThreeInput).length) {
+        const rowLocation = i === 0 ? 'top' :
+                            i === 3 ? 'middle':
+                            i === 6 ? 'bottom': '';
+        const colLocation = j === 0 ? 'left' :
+                            j === 3 ? 'center':
+                            j === 6 ? 'right' : '';
+        errorMsg.textContent = `The ${rowLocation} ${colLocation} 3x3 box contains duplicate values`;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+/** Use recursion to try every number in every empty cell */
+async function solve() {
+  const [r, c] = findNextEmptyCell();
+  // If both r and c are false, we are done
+  if (r === false && c === false) {
+    return true;
+  }
+
+  // Try every number 1-9
+  for (let num = 1; num < 10; num++) {
+    if (visSpeed) await printCell(num, r, c);
+    // If that number is valid, make that cell that number and recursively call solve()
+    if (valid(r, c, num) === true) {
+      puzzle[r][c] = num;
+      const result = await solve();
+      // When true is returned, we are done
+      if (result === true) return true;
+      // Otherwise, it led to a dead end so set the value back to -1
+      puzzle[r][c] = -1;
+      if (visSpeed) await printCell('', r, c);
+    }
+  }
+  if (visSpeed) await printCell('', r, c);
+  return false;
+}
+
+
+/** Prints the solution to the screen */
+function printSolution() {
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const inputBox = document.getElementById(`${i}${j}`);
+      if (inputBox.value.trim() === '' || inputBox.style.backgroundColor === 'lightblue') {
+        inputBox.value = puzzle[i][j];
+        inputBox.style.backgroundColor = 'lightblue';
+      }
+    }
+  }
+}
+
+
+/** Parses data and solves */
+async function getDataAndSolve() {
+  errorMsg.textContent = '';
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const strInput = document.getElementById(`${i}${j}`).value.trim();
+      const numInput = Number(strInput);
+
+      // Error checking
+      if (isNaN(numInput)) {
+        errorMsg.textContent = `${strInput} is not a number`;
+        return;
+      }
+      if (strInput !== '' && (numInput < 1 || numInput > 9)) {
+        errorMsg.textContent = `${numInput} is out of range`;
+        return;
+      }
+      puzzle[i][j] = strInput === '' ? -1 : numInput;
+    }
+  }
+
+  if (validPuzzle()) {
+    // Disable user input while running
+    const buttons = Array.from(document.getElementsByClassName('btn'));
+    const tableInput = Array.from(document.getElementsByClassName('table-input'))
+    buttons.forEach(button => button.disabled = true);
+    tableInput.forEach(input => input.readOnly = true);
+
+    // Solve the puzzle
+    const result = await solve();
+    result ? printSolution() : errorMsg.textContent = 'This puzzle has no solution';
+
+    // Re-enable user input
+    buttons.forEach(button => button.disabled = false);
+    tableInput.forEach(input => input.readOnly = false);
+  }
+}
+
+/** Prints a random demo puzzle to the screen */
+let demoIndex = Math.floor(Math.random() * demos.length);
+function printDemo() {
+  errorMsg.textContent = '';
+  const demo = demos[demoIndex];
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const inputBox = document.getElementById(`${i}${j}`);
+      inputBox.value = demo[i][j];
+      inputBox.style.backgroundColor = "transparent";
+    }
+  }
+  demoIndex = (demoIndex + 1) % demos.length;
+}
+
+/** Clears the puzzle */
+function clearPuzzle() {
+  errorMsg.textContent = '';
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const inputBox = document.getElementById(`${i}${j}`);
+      inputBox.value = "";
+      inputBox.style.backgroundColor = "transparent";
+    }
+  }
+}

@@ -1,44 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
-    <title>Analyzing Road Crashes</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Sudoku Solver</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="main.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js"></script>
 </head>
 <body>
-    <div id="headers">
-        <h1>When Are Road Crashes Most Likely to Happen?</h1>
-        <span>Data source: </span><a href="https://www.kaggle.com/datasets/jaspreetkhokhar/victoria-road-crash-data-2012-2023" target="_blank">Victoria Road Crash Data (2012-2023)</a>
+  <h1 id="main-header">Sudoku Solver Visualizer</h1>
+  <main>
+    <table>
+      <tr>
+        <td><input id="00" class="table-input" maxlength="1"></td>
+        <td><input id="01" class="table-input" maxlength="1"></td>
+        <td><input id="02" class="table-input" maxlength="1"></td>
+        <td><input id="03" class="table-input" maxlength="1"></td>
+        <td><input id="04" class="table-input" maxlength="1"></td>
+        <td><input id="05" class="table-input" maxlength="1"></td>
+        <td><input id="06" class="table-input" maxlength="1"></td>
+        <td><input id="07" class="table-input" maxlength="1"></td>
+        <td><input id="08" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr>
+        <td><input id="10" class="table-input" maxlength="1"></td>
+        <td><input id="11" class="table-input" maxlength="1"></td>
+        <td><input id="12" class="table-input" maxlength="1"></td>
+        <td><input id="13" class="table-input" maxlength="1"></td>
+        <td><input id="14" class="table-input" maxlength="1"></td>
+        <td><input id="15" class="table-input" maxlength="1"></td>
+        <td><input id="16" class="table-input" maxlength="1"></td>
+        <td><input id="17" class="table-input" maxlength="1"></td>
+        <td><input id="18" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr class="bold-row">
+        <td><input id="20" class="table-input" maxlength="1"></td>
+        <td><input id="21" class="table-input" maxlength="1"></td>
+        <td><input id="22" class="table-input" maxlength="1"></td>
+        <td><input id="23" class="table-input" maxlength="1"></td>
+        <td><input id="24" class="table-input" maxlength="1"></td>
+        <td><input id="25" class="table-input" maxlength="1"></td>
+        <td><input id="26" class="table-input" maxlength="1"></td>
+        <td><input id="27" class="table-input" maxlength="1"></td>
+        <td><input id="28" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr>
+        <td><input id="30" class="table-input" maxlength="1"></td>
+        <td><input id="31" class="table-input" maxlength="1"></td>
+        <td><input id="32" class="table-input" maxlength="1"></td>
+        <td><input id="33" class="table-input" maxlength="1"></td>
+        <td><input id="34" class="table-input" maxlength="1"></td>
+        <td><input id="35" class="table-input" maxlength="1"></td>
+        <td><input id="36" class="table-input" maxlength="1"></td>
+        <td><input id="37" class="table-input" maxlength="1"></td>
+        <td><input id="38" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr>
+        <td><input id="40" class="table-input" maxlength="1"></td>
+        <td><input id="41" class="table-input" maxlength="1"></td>
+        <td><input id="42" class="table-input" maxlength="1"></td>
+        <td><input id="43" class="table-input" maxlength="1"></td>
+        <td><input id="44" class="table-input" maxlength="1"></td>
+        <td><input id="45" class="table-input" maxlength="1"></td>
+        <td><input id="46" class="table-input" maxlength="1"></td>
+        <td><input id="47" class="table-input" maxlength="1"></td>
+        <td><input id="48" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr class="bold-row">
+        <td><input id="50" class="table-input" maxlength="1"></td>
+        <td><input id="51" class="table-input" maxlength="1"></td>
+        <td><input id="52" class="table-input" maxlength="1"></td>
+        <td><input id="53" class="table-input" maxlength="1"></td>
+        <td><input id="54" class="table-input" maxlength="1"></td>
+        <td><input id="55" class="table-input" maxlength="1"></td>
+        <td><input id="56" class="table-input" maxlength="1"></td>
+        <td><input id="57" class="table-input" maxlength="1"></td>
+        <td><input id="58" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr>
+        <td><input id="60" class="table-input" maxlength="1"></td>
+        <td><input id="61" class="table-input" maxlength="1"></td>
+        <td><input id="62" class="table-input" maxlength="1"></td>
+        <td><input id="63" class="table-input" maxlength="1"></td>
+        <td><input id="64" class="table-input" maxlength="1"></td>
+        <td><input id="65" class="table-input" maxlength="1"></td>
+        <td><input id="66" class="table-input" maxlength="1"></td>
+        <td><input id="67" class="table-input" maxlength="1"></td>
+        <td><input id="68" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr>
+        <td><input id="70" class="table-input" maxlength="1"></td>
+        <td><input id="71" class="table-input" maxlength="1"></td>
+        <td><input id="72" class="table-input" maxlength="1"></td>
+        <td><input id="73" class="table-input" maxlength="1"></td>
+        <td><input id="74" class="table-input" maxlength="1"></td>
+        <td><input id="75" class="table-input" maxlength="1"></td>
+        <td><input id="76" class="table-input" maxlength="1"></td>
+        <td><input id="77" class="table-input" maxlength="1"></td>
+        <td><input id="78" class="table-input" maxlength="1"></td>
+      </tr>
+      <tr class="bold-row">
+        <td><input id="80" class="table-input" maxlength="1"></td>
+        <td><input id="81" class="table-input" maxlength="1"></td>
+        <td><input id="82" class="table-input" maxlength="1"></td>
+        <td><input id="83" class="table-input" maxlength="1"></td>
+        <td><input id="84" class="table-input" maxlength="1"></td>
+        <td><input id="85" class="table-input" maxlength="1"></td>
+        <td><input id="86" class="table-input" maxlength="1"></td>
+        <td><input id="87" class="table-input" maxlength="1"></td>
+        <td><input id="88" class="table-input" maxlength="1"></td>
+      </tr>
+    </table>
+    <div id="button-group">
+      <button class="btn btn-secondary" onclick="printDemo()">Use a random puzzle</button>
+      <button class="btn btn-primary" onclick="getDataAndSolve()">Solve!</button>
+      <button class="btn btn-secondary" onclick="clearPuzzle()">Clear</button>
     </div>
-    <div id="circle-container">
-        <div class="circle" id="circle-1" style="background-color: #008CBA;"></div>
-        <div class="circle" id="circle-2"></div>
-        <div class="circle" id="circle-3"></div>
+    <div id="vis-options">
+      <b>Visualization speed:</b><br>
+      <div class="form-check">
+        <input type="radio" id="instant" class="form-check-input" name="visualization" value=0 onchange="handleVis()" checked>
+        <label for="instant" class="form-check-label">Instant</label><br>
+      </div>
+      <div class="form-check">
+        <input type="radio" id="fast" class="form-check-input" name="visualization" value=1 onchange="handleVis()">
+        <label for="fast" class="form-check-label">Fast</label><br>
+      </div>
+      <div class="form-check">
+        <input type="radio" id="medium" class="form-check-input" name="visualization" value=100 onchange="handleVis()">
+        <label for="medium" class="form-check-label">Medium</label><br>
+      </div>
+      <div class="form-check">
+        <input type="radio" id="slow" class="form-check-input" name="visualization" value=500 onchange="handleVis()">
+        <label for="slow" class="form-check-label">Slow</label>
+      </div>
     </div>
-        
-    <div style="margin-top: 10px;">
-        <button id="prev-button" onclick="prev()">Previous</button>
-        <button id="start-button" onclick="next()">Start</button>
-    </div>
-
-    <div>
-        <div id="dropdown">
-            <h3>Explore the data by picking a dimension!</h3>
-            <select id="dropdown-options" onChange="displaySceneThree(this.value)">
-                <option value="">Choose</option>
-                <option value="ACCIDENT_DATE">Year</option>
-                <option value="LIGHT_CONDITION">Light Condition</option>
-                <option value="ACCIDENT_TYPE_DESC">Accident Type</option>
-                <option value="ROAD_GEOMETRY_DESC">Road Geometry</option>
-                <option value="RMA">Road Type</option>
-              </select>
-        </div>
-        <div id="chart"></div>
-    </div>
-
-    <script src="main.js"></script>
+    <div id="error-msg"></div>
+  </main>
+  <div id="description">
+    <hr style="margin:25px 0"/>
+    <h3>About this project</h3>
+    <p>
+      This tool uses <a href="https://en.wikipedia.org/wiki/Recursion" target="_blank">recursion</a> and <a href="https://en.wikipedia.org/wiki/Backtracking" target="_blank">backtracking</a> to solve any Sudoku puzzle.
+      The algorithm starts by trying every number from 1 to 9 in the first open cell.  If a number is valid (i.e., it doesn't violate the rules of Sudoku), it moves on to the next cell and, again, tries every number from 1 to 9.
+      If a dead end is reached (no valid number can be put in a cell), the algorithm <i>backtracks</i> to the previous cell and tries the next number.
+    </p>
+    <p>
+      Try putting the visualization on different speeds to see this process in action.
+      If you'd like to finish up a puzzle while the visualization is running, select the "Instant" visualization speed and the puzzle will be finished.
+    </p>
+  </div>
+  <br/>
 </body>
 </html>
